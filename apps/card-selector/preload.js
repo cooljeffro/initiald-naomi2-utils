@@ -4,6 +4,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 
+const appDir = __dirname;
 const appDataPath = require('appdata-path')('initiald-card-selector');
 const settingsFilePath = require('path').join(appDataPath, 'settings.json');
 
@@ -32,18 +33,21 @@ function loadSettings() {
 function saveSettings() {
   fs.ensureDirSync(path.dirname(settingsFilePath));
   fs.writeFileSync(settingsFilePath, JSON.stringify(settings, null, 2));
+  reloadAbsolutePaths();
 }
 
 loadSettings();
-
-
 
 settings.game ??= 'initdv3';
 settings.cardsFolder ??= './cards';
 settings.nvramFolder ??= './data';
 settings.cardFileNameSuffix ??= '.zip.card';
 
-const games = lsDirectory(settings.cardsFolder, false, true);
+let absCardsFolder;
+let absNvramFolder;
+reloadAbsolutePaths();
+
+const games = lsDirectory(absCardsFolder, false, true);
 if (!games.includes(settings.game) && games.length > 0) {
   settings.game = games[0];
   saveSettings();
@@ -95,8 +99,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('save-card').addEventListener('click', onSaveCardClick);
 });
 
+function reloadAbsolutePaths() {
+  absCardsFolder = path.join(appDir, settings.cardsFolder);
+  absNvramFolder = path.join(appDir, settings.nvramFolder);
+}
+
 function refreshGameList() {
-  const updatedGames = lsDirectory(settings.cardsFolder, false, true);
+  const updatedGames = lsDirectory(absCardsFolder, false, true);
   
   // Clear existing options
   gameSelector.innerHTML = '';
@@ -122,9 +131,8 @@ function refreshGameList() {
 
 function onGameChanged() {
   settings.game = gameSelector.value;
-  settings.card
   saveSettings();
-  const cards = lsDirectory(`${settings.cardsFolder}/${settings.game}`, true);
+  const cards = lsDirectory(`${absCardsFolder}/${settings.game}`, true);
   cardSelector.innerHTML = '';
   for (const card of cards) {
     const option = document.createElement('option');
@@ -156,12 +164,12 @@ function onLoadCardClick() {
 
 function onSaveCardClick() {
   const game = gameSelector.value;
-  console.log(`Saving active card ${settings.nvramFolder}/${game}${settings.cardFileNameSuffix}`);
-  if (!fs.existsSync(`${settings.nvramFolder}/${game}${settings.cardFileNameSuffix}`)) {
+  console.log(`Saving active card ${absNvramFolder}/${game}${settings.cardFileNameSuffix}`);
+  if (!fs.existsSync(`${absNvramFolder}/${game}${settings.cardFileNameSuffix}`)) {
     alert('No active card to save.');
     return;
   }
-  if (!fs.existsSync(`${settings.nvramFolder}/${game}.txt`)) {
+  if (!fs.existsSync(`${absNvramFolder}/${game}.txt`)) {
     alert(`Unable to determine card name. Create ${game}.txt file.`);
     return;
   }
@@ -173,23 +181,21 @@ function isActiveCardSaved(game) {
   const card = getActiveCardName(game);
   if (card === null)
     return true;
-  // console.log(getActiveCardContents(game));
-  // console.log(getSavedCardContents(game, card));
   return Buffer.compare(getActiveCardContents(game), getSavedCardContents(game, card)) === 0;
 }
 
 function getActiveCardName(game) {
-  try { return fs.readFileSync(`${settings.nvramFolder}/${game}.txt`); }
+  try { return fs.readFileSync(`${absNvramFolder}/${game}.txt`); }
   catch { return null; }
 }
 
 function getActiveCardContents(game) {
-  try { return fs.readFileSync(`${settings.nvramFolder}/${game}.card`); }
+  try { return fs.readFileSync(`${absNvramFolder}/${game}${settings.cardFileNameSuffix}`); }
   catch { return null; }
 }
 
 function getSavedCardContents(game, card) {
-  const cardPath = `${settings.cardsFolder}/${game}/${card}`;
+  const cardPath = `${absCardsFolder}/${game}/${card}`;
   try { return fs.readFileSync(cardPath); }
   catch {
     console.error(`Error reading saved card: ${cardPath}`)
@@ -198,10 +204,10 @@ function getSavedCardContents(game, card) {
 }
 
 function saveActiveCard(game, card) {
-  fs.copyFileSync(`${settings.nvramFolder}/${game}${settings.cardFileNameSuffix}`, `${settings.cardsFolder}/${game}/${card}`);
+  fs.copyFileSync(`${absNvramFolder}/${game}${settings.cardFileNameSuffix}`, `${absCardsFolder}/${game}/${card}`);
 }
 
 function loadCard(game, card) {
-  fs.copyFileSync(`${settings.cardsFolder}/${game}/${card}`, `${settings.nvramFolder}/${game}${settings.cardFileNameSuffix}`);
-  fs.writeFileSync(`${settings.nvramFolder}/${game}.txt`, card);
+  fs.copyFileSync(`${absCardsFolder}/${game}/${card}`, `${absNvramFolder}/${game}${settings.cardFileNameSuffix}`);
+  fs.writeFileSync(`${absNvramFolder}/${game}.txt`, card);
 }
