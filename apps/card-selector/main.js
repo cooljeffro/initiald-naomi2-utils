@@ -21,17 +21,6 @@ function createWindow (){
   // mainWindow.webContents.openDevTools()
 }
 
-function loadSettings() {
-  if (fs.existsSync(settingsPath)) {
-    return JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
-  }
-  return {};
-}
-
-function saveSettings(settings) {
-  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
-}
-
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
