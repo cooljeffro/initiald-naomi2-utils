@@ -53,10 +53,12 @@
       "allowToChangeInstallationDirectory": true
     }
   },
-  "devDependencies": {
+  "dependencies": {
     "appdata-path": "^1.0.0",
-    "electron": "^40.0.0",
-    "electron-builder": "^26.4.0",
     "fs-extra": "^11.3.3"
+  },
+  "devDependencies": {
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0"
   }
 }
