@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <title>Initial D Arcade Stage Card Selector</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <h1>Initial D Arcade Stage Card Selector</h1>
+    
+    <h2>Settings</h2>
+    <div>
+      <label for="cards-folder">Cards Folder:</label>
+      <input type="text" id="cards-folder" placeholder="./cards">
+    </div>
+    <div>
+      <label for="nvram-folder">nvram/data Folder:</label>
+      <input type="text" id="nvram-folder" placeholder="./data">
+    </div>
+    <div>
+      <label for="card-suffix">Card Name Suffix:</label>
+      <input type="text" id="card-suffix" placeholder=".card">
+    </div>
+    <button id="save-settings">Save Settings</button>
+    <hr>
+    
+    <h2>Card Selection</h2>
+    <div>
+      <label for="games">Game:</label>
+      <select id="games"></select>
+    </div>
+    <div>
+      <label for="cards">Card:</label>
+      <select id="cards"></select>
+    </div>
+    <br>
+    <button id="save-card">Save Card</button>
+    <button id="load-card">Load Card</button>
+
+    <!-- You can also require other files to run in this process -->
+    <script src="./renderer.js"></script>
+  </body>
+</html>
